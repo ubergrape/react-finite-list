@@ -3,14 +3,15 @@
   "version": "0.1.0",
   "main": "lib/index.js",
   "engines": {
-    "node": "2.4.0"
+    "node": "2.5.0"
   },
   "dependencies": {
     "lodash": "^3.10.0",
-    "react-visibility-sensor": "^2.0.0"
+    "react-visibility-sensor": "git+ssh://git@github.com/ubergrape/react-visibility-sensor.git"
   },
   "peerDependencies": {
-    "react": "^0.13.3"
+    "react": "^0.14.0",
+    "react-dom": "^0.14.0"
   },
   "devDependencies": {
     "babel": "^5.6.14",
@@ -36,7 +37,7 @@
     "webpack-dev-server": "^1.10.1"
   },
   "scripts": {
-    "all": "npm run lint && npm run test && npm run build",
+    "all": "npm run lint && npm run build",
     "clean": "rm -fr ./lib/*",
     "build": "npm run clean && babel src --out-dir lib",
     "start": "NODE_ENV=development webpack-dev-server --hot",

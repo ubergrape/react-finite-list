@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import ReactDOM from 'react-dom'
 import findIndex from 'lodash/array/findIndex'
 import noop from 'lodash/utility/noop'
 import debounce from 'lodash/function/debounce'
@@ -28,7 +29,7 @@ export default class FiniteList extends Component {
   }
 
   componentDidMount() {
-    this.setState({node: React.findDOMNode(this)})
+    this.setState({node: ReactDOM.findDOMNode(this)})
   }
 
   render() {
@@ -42,10 +43,10 @@ export default class FiniteList extends Component {
     )
   }
 
-  renderItems() {
+  renderItems() {
     let {items, node} = this.state
     // We need theis DOM node for visibility sensor.
-    if (!node || !items.length) return
+    if (!node || !items.length) return null
 
     return items.map((item, i) => {
       let element = this.props.renderItem({
@@ -84,7 +85,7 @@ export default class FiniteList extends Component {
     let item
 
     if (typeof selector == 'string') {
-      let index = findIndex(items, item => item === this.state.focused)
+      let index = findIndex(items, _item => _item === this.state.focused)
       if (selector === 'next') {
         index++
         if (!items[index]) index = 0
@@ -114,7 +115,7 @@ export default class FiniteList extends Component {
     if (isVisible || this.scrolling) return
 
     let viewPortNode = this.state.node
-    let itemNode = React.findDOMNode(this.refs[`item-${index}`])
+    let itemNode = ReactDOM.findDOMNode(this.refs[`item-${index}`])
     let itemTop = itemNode.offsetTop
 
     // Scrolling up.
@@ -135,11 +136,11 @@ export default class FiniteList extends Component {
     this.refs[`sensor-${index}`].check()
   }
 
-  onScrollStop() {
+  onScrollStop() {
     this.scrolling = false
   }
 
-  onScroll() {
+  onScroll() {
     this.scrolling = true
     this.onScrollStopDebounced()
   }
