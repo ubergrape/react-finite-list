@@ -1,6 +1,6 @@
 {
   "name": "react-finite-list",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "main": "lib/index.js",
   "engines": {
     "node": "2.5.0"
