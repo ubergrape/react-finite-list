@@ -57,6 +57,10 @@ export default class FiniteList extends Component {
   }
 
   componentDidMount() {
+    // We need to pass the DOM node to VisibilitySensor in render method,
+    // however react wants us to make render function without side effects.
+    // Without this reference we don't render anything at first pass, thats why
+    // we need to rerender when we got the node ref.
     if (!this.node) this.forceUpdate()
     this.node = ReactDOM.findDOMNode(this)
   }
@@ -126,7 +130,7 @@ export default class FiniteList extends Component {
   renderItems() {
     const {items} = this.props
 
-    // We need theis DOM node for visibility sensor.
+    // Without containment DOM node VisibilitySensor won't work.
     if (!this.node || !items.length) return null
 
     return items.map((item, index) => {
@@ -140,6 +144,8 @@ export default class FiniteList extends Component {
         ref: `item-${index}`
       })
       return (
+        // VisibilitySensor is used to react when a list item goes out of viewport
+        // for e.g. when it is scrolled down and became invisible.
         <VisibilitySensor
           onChange={this.onVisibilityChange.bind(this, index)}
           containment={this.node}
