@@ -19,7 +19,7 @@ function findIndexBySelector(selector, list, validation) {
   }
 
   if (selector === 'prev') {
-    index = list[currIndex - 1] ? currIndex - 1 : list[list.length - 1]
+    index = list[currIndex - 1] ? currIndex - 1 : list.length - 1
   }
 
   return index
