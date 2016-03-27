@@ -79,9 +79,16 @@ export default class FiniteList extends Component {
     this.props.onSelect(item)
   }
 
-  onVisibilityChange(index, isVisible, visibilityRect) {
-    if (isVisible || this.scrolling) return
+  onScrollStop() {
+    this.scrolling = false
+  }
 
+  onScroll() {
+    this.scrolling = true
+    this.onScrollStopDebounced()
+  }
+
+  scrollTo(index, isVisible, visibilityRect) {
     const itemNode = ReactDOM.findDOMNode(this.refs[`item-${index}`])
     const itemTop = itemNode.offsetTop
 
@@ -96,15 +103,6 @@ export default class FiniteList extends Component {
     }
 
     this.node.scrollTop = scrollTop
-  }
-
-  onScrollStop() {
-    this.scrolling = false
-  }
-
-  onScroll() {
-    this.scrolling = true
-    this.onScrollStopDebounced()
   }
 
   /**
@@ -124,7 +122,12 @@ export default class FiniteList extends Component {
 
   checkSensor(item) {
     const index = findIndex(this.props.items, _item => _item === item)
-    this.refs[`sensor-${index}`].check()
+    const state = this.refs[`sensor-${index}`].check()
+    const {isVisible, visibilityRect} = state
+
+    if (isVisible || this.scrolling) return
+
+    this.scrollTo(index, isVisible, visibilityRect)
   }
 
   renderItems() {
@@ -147,7 +150,7 @@ export default class FiniteList extends Component {
         // VisibilitySensor is used to react when a list item goes out of viewport
         // for e.g. when it is scrolled down and became invisible.
         <VisibilitySensor
-          onChange={this.onVisibilityChange.bind(this, index)}
+          onChange={noop}
           containment={this.node}
           active={false}
           ref={`sensor-${index}`}
