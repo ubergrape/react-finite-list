@@ -1,13 +1,13 @@
 {
   "name": "react-finite-list",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "lib/index.js",
   "engines": {
     "node": "2.5.0"
   },
   "dependencies": {
     "lodash": "^3.10.0",
-    "react-visibility-sensor": "ubergrape/react-visibility-sensor"
+    "react-visibility-sensor": "^3.1.1"
   },
   "peerDependencies": {
     "react": "^0.14.0",
