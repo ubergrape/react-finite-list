@@ -1,4 +1,5 @@
-import React, {Component, PropTypes} from 'react'
+import React, {Component} from 'react'
+import PropTypes from 'prop-types'
 import ReactDOM from 'react-dom'
 import findIndex from 'lodash/array/findIndex'
 import noop from 'lodash/utility/noop'
