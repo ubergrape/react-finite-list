@@ -1,6 +1,6 @@
 {
   "name": "react-finite-list",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "main": "lib/index.js",
   "engines": {
     "node": "2.5.0"
@@ -10,7 +10,7 @@
     "prop-types": "^15.5.10",
     "react-visibility-sensor": "^3.1.1"
   },
- "peerDependencies": {
+  "peerDependencies": {
     "react": "^0.14.0 || ^15.0.0",
     "react-dom": "^0.14.0 || ^15.0.0"
   },
