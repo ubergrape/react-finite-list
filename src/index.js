@@ -1,6 +1,6 @@
 /* eslint-disable react/no-array-index-key */
 
-import React, {Component} from 'react'
+import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import {findDOMNode} from 'react-dom'
 import findIndex from 'lodash/array/findIndex'
@@ -29,7 +29,7 @@ function findIndexBySelector(selector, list, validation) {
 
 const findIndexByItem = (item, list) => findIndex(list, _item => _item === item)
 
-export default class FiniteList extends Component {
+export default class FiniteList extends PureComponent {
   static propTypes = {
     focused: PropTypes.any,
     onMouseOver: PropTypes.func,
@@ -55,20 +55,18 @@ export default class FiniteList extends Component {
     }
   }
 
-  constructor(props) {
-    super(props)
-    this.scrolling = false
-    this.index = 0
-    this.onScrollStopDebounced = debounce(this.onScrollStop, 30)
-  }
+  isScrolling = false
+  index = 0
 
   componentDidMount() {
     // We need to pass the DOM node to VisibilitySensor in render method,
     // however react wants us to make render function without side effects.
     // Without this reference we don't render anything at first pass, thats why
     // we need to rerender when we got the node ref.
-    if (!this.node) this.forceUpdate()
-    this.node = findDOMNode(this)
+    if (!this.node) {
+      this.node = findDOMNode(this)
+      this.forceUpdate()
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -77,25 +75,13 @@ export default class FiniteList extends Component {
     }
   }
 
-  onMouseOver(item) {
-    this.props.onMouseOver(item)
-  }
-
-  onMouseUp(item) {
-    this.props.onSelect(item)
-  }
-
-  onScrollStop = () => {
-    this.scrolling = false
-  }
+  onScrollStop = debounce(() => {
+    this.isScrolling = false
+  }, 30)
 
   onScroll = () => {
-    this.scrolling = true
-    this.onScrollStopDebounced()
-  }
-
-  onRef = (node) => {
-    this.node = node
+    this.isScrolling = true
+    this.onScrollStop()
   }
 
   scrollTo(index) {
@@ -121,7 +107,7 @@ export default class FiniteList extends Component {
    * Selector can be a string prev/next or item object.
    */
   focus(itemOrSelector) {
-    const {items, focused} = this.props
+    const {items, focused, onFocus} = this.props
     let item = itemOrSelector
 
     if (typeof itemOrSelector === 'string') {
@@ -129,7 +115,7 @@ export default class FiniteList extends Component {
       item = items[this.index]
     }
 
-    this.props.onFocus(item)
+    onFocus(item)
   }
 
   checkSensor(item) {
@@ -137,7 +123,7 @@ export default class FiniteList extends Component {
     // eslint-disable-next-line react/no-string-refs
     const state = this.refs[`sensor-${index}`].check()
 
-    if (!state.isVisible && !this.scrolling) {
+    if (!state.isVisible && !this.isScrolling) {
       this.scrollTo(index)
     }
 
@@ -145,19 +131,20 @@ export default class FiniteList extends Component {
   }
 
   renderItems() {
-    const {items} = this.props
+    const {items, renderItem, focused, onMouseOver, onSelect} = this.props
 
     // Without containment DOM node VisibilitySensor won't work.
     if (!this.node || !items.length) return null
 
     return items.map((item, index) => {
-      const element = this.props.renderItem({
+      const element = renderItem({
         item,
-        focused: this.props.focused === item
+        focused: focused === item
       })
+
       const clone = React.cloneElement(element, {
-        onMouseOver: this.onMouseOver.bind(this, item),
-        onMouseUp: this.onMouseUp.bind(this, item),
+        onMouseOver: onMouseOver.bind(this, item),
+        onMouseUp: onSelect.bind(this, item),
         ref: `item-${index}`
       })
 
@@ -169,7 +156,7 @@ export default class FiniteList extends Component {
           containment={this.node}
           active={false}
           ref={`sensor-${index}`}
-          key={`sensor-${index}`}
+          key={element.key}
         >
           {clone}
         </VisibilitySensor>
