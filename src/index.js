@@ -1,11 +1,12 @@
+/* eslint-disable react/no-array-index-key */
+
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import ReactDOM from 'react-dom'
+import {findDOMNode} from 'react-dom'
 import findIndex from 'lodash/array/findIndex'
 import noop from 'lodash/utility/noop'
 import debounce from 'lodash/function/debounce'
 import VisibilitySensor from 'react-visibility-sensor'
-
 
 /**
  * Finds an element index in a list by selector "prev" or "next".
@@ -26,6 +27,8 @@ function findIndexBySelector(selector, list, validation) {
   return index
 }
 
+const findIndexByItem = (item, list) => findIndex(list, _item => _item === item)
+
 export default class FiniteList extends Component {
   static propTypes = {
     focused: PropTypes.any,
@@ -41,6 +44,7 @@ export default class FiniteList extends Component {
   static defaultProps = {
     items: [],
     className: '',
+    focused: null,
     onSelect: noop,
     renderItem: noop,
     onFocus: noop,
@@ -54,7 +58,8 @@ export default class FiniteList extends Component {
   constructor(props) {
     super(props)
     this.scrolling = false
-    this.onScrollStopDebounced = debounce(::this.onScrollStop, 30)
+    this.index = 0
+    this.onScrollStopDebounced = debounce(this.onScrollStop, 30)
   }
 
   componentDidMount() {
@@ -63,7 +68,7 @@ export default class FiniteList extends Component {
     // Without this reference we don't render anything at first pass, thats why
     // we need to rerender when we got the node ref.
     if (!this.node) this.forceUpdate()
-    this.node = ReactDOM.findDOMNode(this)
+    this.node = findDOMNode(this)
   }
 
   componentDidUpdate(prevProps) {
@@ -80,27 +85,33 @@ export default class FiniteList extends Component {
     this.props.onSelect(item)
   }
 
-  onScrollStop() {
+  onScrollStop = () => {
     this.scrolling = false
   }
 
-  onScroll() {
+  onScroll = () => {
     this.scrolling = true
     this.onScrollStopDebounced()
   }
 
-  scrollTo(index, isVisible, visibilityRect) {
-    const itemNode = ReactDOM.findDOMNode(this.refs[`item-${index}`])
+  onRef = (node) => {
+    this.node = node
+  }
+
+  scrollTo(index) {
+    // eslint-disable-next-line react/no-string-refs
+    const itemNode = findDOMNode(this.refs[`item-${index}`])
     const itemTop = itemNode.offsetTop
+    const direction = this.index - index
 
     // Scrolling up.
     let scrollTop = itemTop
 
     // Scrolling down.
-    if (visibilityRect.top) {
+    if (direction < 0) {
       const viewPortHeight = this.node.offsetHeight
       const itemHeight = itemNode.offsetHeight
-      scrollTop = itemTop - viewPortHeight + itemHeight
+      scrollTop = (itemTop - viewPortHeight) + itemHeight
     }
 
     this.node.scrollTop = scrollTop
@@ -109,26 +120,28 @@ export default class FiniteList extends Component {
   /**
    * Selector can be a string prev/next or item object.
    */
-  focus(selector) {
+  focus(itemOrSelector) {
     const {items, focused} = this.props
-    let item = selector
+    let item = itemOrSelector
 
-    if (typeof selector == 'string') {
-      const index = findIndexBySelector(selector, items, _item => _item === focused)
-      item = items[index]
+    if (typeof itemOrSelector === 'string') {
+      this.index = findIndexBySelector(itemOrSelector, items, _item => _item === focused)
+      item = items[this.index]
     }
 
     this.props.onFocus(item)
   }
 
   checkSensor(item) {
-    const index = findIndex(this.props.items, _item => _item === item)
+    const index = findIndexByItem(item, this.props.items)
+    // eslint-disable-next-line react/no-string-refs
     const state = this.refs[`sensor-${index}`].check()
-    const {isVisible, visibilityRect} = state
 
-    if (isVisible || this.scrolling) return
+    if (!state.isVisible && !this.scrolling) {
+      this.scrollTo(index)
+    }
 
-    this.scrollTo(index, isVisible, visibilityRect)
+    this.index = index
   }
 
   renderItems() {
@@ -147,6 +160,7 @@ export default class FiniteList extends Component {
         onMouseUp: this.onMouseUp.bind(this, item),
         ref: `item-${index}`
       })
+
       return (
         // VisibilitySensor is used to react when a list item goes out of viewport
         // for e.g. when it is scrolled down and became invisible.
@@ -155,7 +169,8 @@ export default class FiniteList extends Component {
           containment={this.node}
           active={false}
           ref={`sensor-${index}`}
-          key={`sensor-${index}`}>
+          key={`sensor-${index}`}
+        >
           {clone}
         </VisibilitySensor>
       )
@@ -166,8 +181,9 @@ export default class FiniteList extends Component {
     return (
       <div
         className={this.props.className}
-        onScroll={::this.onScroll}
-        style={this.props.style}>
+        onScroll={this.onScroll}
+        style={this.props.style}
+      >
         {this.renderItems()}
       </div>
     )
