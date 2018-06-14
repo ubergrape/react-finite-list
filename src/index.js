@@ -1,5 +1,3 @@
-/* eslint-disable react/no-array-index-key */
-
 import React, {PureComponent} from 'react'
 import PropTypes from 'prop-types'
 import {findDOMNode} from 'react-dom'
@@ -55,9 +53,6 @@ export default class FiniteList extends PureComponent {
     }
   }
 
-  isScrolling = false
-  index = 0
-
   componentDidMount() {
     // We need to pass the DOM node to VisibilitySensor in render method,
     // however react wants us to make render function without side effects.
@@ -83,6 +78,9 @@ export default class FiniteList extends PureComponent {
     this.isScrolling = true
     this.onScrollStop()
   }
+
+  isScrolling = false
+  index = 0
 
   scrollTo(index) {
     // eslint-disable-next-line react/no-string-refs
