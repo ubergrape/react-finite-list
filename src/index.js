@@ -1,9 +1,7 @@
 import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
 import { findDOMNode } from 'react-dom'
-import findIndex from 'lodash/array/findIndex'
-import noop from 'lodash/utility/noop'
-import debounce from 'lodash/function/debounce'
+import { debounce, findIndex, noop } from 'lodash'
 import VisibilitySensor from 'react-visibility-sensor'
 
 /**
