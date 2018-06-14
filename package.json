@@ -9,8 +9,8 @@
     "react-visibility-sensor": "^3.1.1"
   },
   "peerDependencies": {
-    "react": "^15.5.4",
-    "react-dom": "^15.5.4"
+    "react": ">=15.5.4",
+    "react-dom": ">=15.5.4"
   },
   "devDependencies": {
     "babel-cli": "^6.18.0",
