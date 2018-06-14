@@ -1,11 +1,7 @@
-/* eslint-disable react/no-array-index-key */
-
-import React, {PureComponent} from 'react'
+import React, { PureComponent } from 'react'
 import PropTypes from 'prop-types'
-import {findDOMNode} from 'react-dom'
-import findIndex from 'lodash/array/findIndex'
-import noop from 'lodash/utility/noop'
-import debounce from 'lodash/function/debounce'
+import { findDOMNode } from 'react-dom'
+import { debounce, findIndex, noop } from 'lodash'
 import VisibilitySensor from 'react-visibility-sensor'
 
 /**
@@ -38,7 +34,7 @@ export default class FiniteList extends PureComponent {
     renderItem: PropTypes.func,
     items: PropTypes.array,
     className: PropTypes.string,
-    style: PropTypes.object
+    style: PropTypes.object,
   }
 
   static defaultProps = {
@@ -51,12 +47,9 @@ export default class FiniteList extends PureComponent {
     onMouseOver: noop,
     style: {
       overflow: 'auto',
-      position: 'relative'
-    }
+      position: 'relative',
+    },
   }
-
-  isScrolling = false
-  index = 0
 
   componentDidMount() {
     // We need to pass the DOM node to VisibilitySensor in render method,
@@ -84,6 +77,9 @@ export default class FiniteList extends PureComponent {
     this.onScrollStop()
   }
 
+  isScrolling = false
+  index = 0
+
   scrollTo(index) {
     // eslint-disable-next-line react/no-string-refs
     const itemNode = findDOMNode(this.refs[`item-${index}`])
@@ -97,7 +93,7 @@ export default class FiniteList extends PureComponent {
     if (direction < 0) {
       const viewPortHeight = this.node.offsetHeight
       const itemHeight = itemNode.offsetHeight
-      scrollTop = (itemTop - viewPortHeight) + itemHeight
+      scrollTop = itemTop - viewPortHeight + itemHeight
     }
 
     this.node.scrollTop = scrollTop
@@ -107,11 +103,15 @@ export default class FiniteList extends PureComponent {
    * Selector can be a string prev/next or item object.
    */
   focus(itemOrSelector) {
-    const {items, focused, onFocus} = this.props
+    const { items, focused, onFocus } = this.props
     let item = itemOrSelector
 
     if (typeof itemOrSelector === 'string') {
-      this.index = findIndexBySelector(itemOrSelector, items, _item => _item === focused)
+      this.index = findIndexBySelector(
+        itemOrSelector,
+        items,
+        _item => _item === focused,
+      )
       item = items[this.index]
     }
 
@@ -131,7 +131,7 @@ export default class FiniteList extends PureComponent {
   }
 
   renderItems() {
-    const {items, renderItem, focused, onMouseOver, onSelect} = this.props
+    const { items, renderItem, focused, onMouseOver, onSelect } = this.props
 
     // Without containment DOM node VisibilitySensor won't work.
     if (!this.node || !items.length) return null
@@ -139,13 +139,13 @@ export default class FiniteList extends PureComponent {
     return items.map((item, index) => {
       const element = renderItem({
         item,
-        focused: focused === item
+        focused: focused === item,
       })
 
       const clone = React.cloneElement(element, {
         onMouseOver: onMouseOver.bind(this, item),
         onMouseUp: onSelect.bind(this, item),
-        ref: `item-${index}`
+        ref: `item-${index}`,
       })
 
       return (
