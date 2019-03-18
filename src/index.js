@@ -120,6 +120,8 @@ export default class FiniteList extends PureComponent {
 
   checkSensor(item) {
     const index = findIndexByItem(item, this.props.items)
+    if (index === -1) return
+
     // eslint-disable-next-line react/no-string-refs
     const state = this.refs[`sensor-${index}`].check()
 
